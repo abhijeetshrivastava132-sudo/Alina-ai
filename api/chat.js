@@ -1,70 +1,109 @@
-export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+const DEFAULT_MODELS = [
+  process.env.GEMINI_MODEL,
+  "gemini-2.0-flash",
+  "gemini-1.5-flash"
+].filter(Boolean);
+
+function sendJson(res, status, payload) {
+  res.setHeader("Content-Type", "application/json");
+  return res.status(status).json(payload);
+}
+
+function cleanMessage(value) {
+  if (typeof value !== "string") return "";
+  return value.trim().slice(0, 4000);
+}
+
+async function callGemini({ apiKey, model, message }) {
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      systemInstruction: {
+        parts: [
+          {
+            text:
+              "You are Alina, a short, clear, helpful voice assistant. Reply naturally in simple Hinglish when the user speaks casually. Keep answers brief unless detail is needed."
+          }
+        ]
+      },
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: message }]
+        }
+      ],
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 220
+      }
+    })
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const detail = data?.error?.message || `Gemini HTTP ${response.status}`;
+    const error = new Error(detail);
+    error.status = response.status;
+    error.model = model;
+    throw error;
   }
 
-  try {
-    const { message } = req.body || {};
+  const reply =
+    data?.candidates?.[0]?.content?.parts
+      ?.map((part) => part.text || "")
+      .join(" ")
+      .trim() || "No reply received.";
 
-    if (!message || typeof message !== "string") {
-      return res.status(400).json({ error: "Message is required" });
-    }
+  return reply;
+}
 
-    const apiKey = process.env.GEMINI_API_KEY;
+export default async function handler(req, res) {
+  if (req.method === "OPTIONS") {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    return res.status(204).end();
+  }
 
-    if (!apiKey) {
-      return res.status(500).json({ error: "GEMINI_API_KEY is missing" });
-    }
+  if (req.method !== "POST") {
+    return sendJson(res, 405, { error: "Method not allowed" });
+  }
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          systemInstruction: {
-            parts: [
-              {
-                text: "You are Alina, a short, clear, helpful voice assistant. Reply naturally in simple Hinglish when the user speaks casually. Keep answers brief unless detail is needed."
-              }
-            ]
-          },
-          contents: [
-            {
-              role: "user",
-              parts: [{ text: message }]
-            }
-          ],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 220
-          }
-        })
-      }
-    );
+  const apiKey = process.env.GEMINI_API_KEY;
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      return res.status(response.status).json({
-        error: "Gemini request failed",
-        detail: data?.error?.message || "Unknown Gemini error"
-      });
-    }
-
-    const reply =
-      data?.candidates?.[0]?.content?.parts
-        ?.map((part) => part.text || "")
-        .join(" ")
-        .trim() || "No reply received.";
-
-    return res.status(200).json({ reply });
-  } catch (error) {
-    return res.status(500).json({
-      error: "AI request failed",
-      detail: error.message
+  if (!apiKey) {
+    return sendJson(res, 500, {
+      error: "GEMINI_API_KEY is missing",
+      detail: "Add GEMINI_API_KEY in Vercel Project Settings > Environment Variables."
     });
   }
+
+  const message = cleanMessage(req.body?.message);
+
+  if (!message) {
+    return sendJson(res, 400, { error: "Message is required" });
+  }
+
+  const failures = [];
+
+  for (const model of DEFAULT_MODELS) {
+    try {
+      const reply = await callGemini({ apiKey, model, message });
+      return sendJson(res, 200, { reply, model });
+    } catch (error) {
+      failures.push(`${error.model || model}: ${error.message}`);
+    }
+  }
+
+  return sendJson(res, 502, {
+    error: "Gemini request failed",
+    detail: failures[failures.length - 1] || "No Gemini model responded.",
+    triedModels: DEFAULT_MODELS
+  });
 }
