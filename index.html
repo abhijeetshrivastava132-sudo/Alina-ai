@@ -45,7 +45,15 @@ button:hover{background:rgba(0,255,102,.12)}
 </aside>
 <section class="terminal" id="terminal"><p class="line dim">&gt; Alina initialized</p><p class="line dim">&gt; Click LISTEN and speak</p></section>
 </main>
-<script>
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js';
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, query, orderBy, limit, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
+
+const firebaseConfig={apiKey:'AIzaSyBFrV_4JNMEa5Kyn4ONgGU6TX3fm_PPG14',authDomain:'alina-9810d.firebaseapp.com',projectId:'alina-9810d',storageBucket:'alina-9810d.firebasestorage.app',messagingSenderId:'252424011810',appId:'1:252424011810:web:7b36824468e9a55211ca7b',measurementId:'G-ZRM0Z12S5W'};
+const firebaseApp=initializeApp(firebaseConfig);
+const db=getFirestore(firebaseApp);
+const messagesRef=collection(db,'messages');
+
 const app=document.getElementById('app');
 const statusEl=document.getElementById('status');
 const terminal=document.getElementById('terminal');
@@ -56,23 +64,24 @@ const historyPanel=document.getElementById('historyPanel');
 const historyList=document.getElementById('historyList');
 const clearHistoryBtn=document.getElementById('clearHistoryBtn');
 const API_URL='/api/chat';
-const HISTORY_KEY='alina_history';
 const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
 let recognition=null;
-let history=JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]');
+let history=[];
 function line(t,d=false){const p=document.createElement('p');p.className=d?'line dim':'line';p.textContent=t;terminal.appendChild(p);while(terminal.children.length>8)terminal.removeChild(terminal.firstElementChild)}
-function renderHistory(){historyList.innerHTML='';if(!history.length){historyList.innerHTML='<p class="history-item"><span>No history yet</span></p>';return}history.slice().reverse().forEach(item=>{const div=document.createElement('div');div.className='history-item';div.innerHTML='<b>&gt; '+escapeHtml(item.q)+'</b><span>'+escapeHtml(item.a)+'</span>';historyList.appendChild(div)})}
-function saveHistory(q,a){history.push({q,a,time:Date.now()});history=history.slice(-30);localStorage.setItem(HISTORY_KEY,JSON.stringify(history));renderHistory()}
+function renderHistory(){historyList.innerHTML='';if(!history.length){historyList.innerHTML='<p class="history-item"><span>No history yet</span></p>';return}history.forEach(item=>{const div=document.createElement('div');div.className='history-item';div.innerHTML='<b>&gt; '+escapeHtml(item.q)+'</b><span>'+escapeHtml(item.a)+'</span>';historyList.appendChild(div)})}
+async function loadHistory(){try{const q=query(messagesRef,orderBy('createdAt','desc'),limit(30));const snap=await getDocs(q);history=snap.docs.map(d=>({id:d.id,...d.data()}));renderHistory()}catch(err){historyList.innerHTML='<p class="history-item"><span>Firestore error: '+escapeHtml(err.message)+'</span></p>'}}
+async function saveHistory(q,a){try{await addDoc(messagesRef,{q,a,createdAt:serverTimestamp()});await loadHistory()}catch(err){line('> history save error: '+err.message,true)}}
+async function clearHistory(){try{const q=query(messagesRef,orderBy('createdAt','desc'),limit(30));const snap=await getDocs(q);await Promise.all(snap.docs.map(d=>deleteDoc(d.ref)));history=[];renderHistory()}catch(err){line('> clear history error: '+err.message,true)}}
 function escapeHtml(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 function say(t){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-IN';u.rate=.95;speechSynthesis.speak(u)}
 async function askAI(msg){try{const r=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg})});let d={};try{d=await r.json()}catch(err){}if(!r.ok)return 'Backend error: '+(d.detail||d.error||('HTTP '+r.status));return d.reply||'No reply received.'}catch(err){return 'Network error: '+err.message}}
-async function handle(text){line('> you: '+text);statusEl.textContent='THINKING';const reply=await askAI(text);line('> alina: '+reply);saveHistory(text,reply);statusEl.textContent='READY';say(reply)}
+async function handle(text){line('> you: '+text);statusEl.textContent='THINKING';const reply=await askAI(text);line('> alina: '+reply);await saveHistory(text,reply);statusEl.textContent='READY';say(reply)}
 function listen(){if(!SpeechRecognition){line('> browser speech recognition support nahi karta');say('Speech recognition is not supported.');return}recognition=new SpeechRecognition();recognition.lang='en-IN';recognition.interimResults=false;recognition.continuous=false;recognition.onstart=()=>{app.classList.add('listening');statusEl.textContent='LISTENING';line('> listening...',true)};recognition.onresult=e=>handle(e.results[0][0].transcript);recognition.onerror=()=>{statusEl.textContent='ERROR';line('> mic permission error')};recognition.onend=()=>{app.classList.remove('listening');if(statusEl.textContent==='LISTENING')statusEl.textContent='READY'};recognition.start()}
 function stopAll(){if(recognition)recognition.stop();speechSynthesis.cancel();app.classList.remove('listening');statusEl.textContent='READY';line('> stopped',true)}
 listenBtn.onclick=listen;stopBtn.onclick=stopAll;
 menuBtn.onclick=()=>historyPanel.classList.toggle('open');
-clearHistoryBtn.onclick=()=>{history=[];localStorage.removeItem(HISTORY_KEY);renderHistory()};
-renderHistory();
+clearHistoryBtn.onclick=clearHistory;
+loadHistory();
 </script>
 </body>
 </html>
