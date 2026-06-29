@@ -27,7 +27,7 @@ async function callGemini({ apiKey, model, message }) {
         parts: [
           {
             text:
-              "You are Alina, a short, clear, helpful voice assistant. Reply naturally in simple Hinglish when the user speaks casually. Keep answers brief unless detail is needed."
+              "You are Alina, a helpful voice assistant. Reply naturally in simple Hinglish if the user speaks casually. Do not give one-word or ultra-short replies. Give useful answers in 2 to 5 short lines by default. If the user asks for detail, explain properly with practical steps."
           }
         ]
       },
@@ -38,8 +38,8 @@ async function callGemini({ apiKey, model, message }) {
         }
       ],
       generationConfig: {
-        temperature: 0.7,
-        maxOutputTokens: 220
+        temperature: 0.8,
+        maxOutputTokens: 900
       }
     })
   });
