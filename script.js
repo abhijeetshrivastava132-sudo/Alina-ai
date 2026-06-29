@@ -2,10 +2,7 @@ const canvas = document.getElementById("particleCanvas");
 const ctx = canvas.getContext("2d");
 const hudShell = document.getElementById("hudShell");
 const coreWrap = document.getElementById("coreWrap");
-const micButton = document.getElementById("micButton");
 const timeDisplay = document.getElementById("timeDisplay");
-const commandText = document.getElementById("commandText");
-const statusText = document.getElementById("statusText");
 const codeFeed = document.getElementById("codeFeed");
 const loadValue = document.getElementById("loadValue");
 const signalValue = document.getElementById("signalValue");
@@ -17,17 +14,8 @@ let height = 0;
 let particles = [];
 let active = false;
 
-const commands = [
-  "Calibrating acoustic matrix",
-  "Mapping neural response layer",
-  "Secure channel established",
-  "Command layer standing by",
-  "Synthetic cognition shell active",
-  "Interface stabilized"
-];
-
 const logs = [
-  "voice kernel synchronized",
+  "kernel synchronized",
   "gesture layer mapped",
   "visual telemetry locked",
   "ambient scan complete",
@@ -72,7 +60,7 @@ function drawParticles() {
 
     ctx.beginPath();
     ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(103, 232, 249, ${particle.alpha})`;
+    ctx.fillStyle = `rgba(0, 255, 102, ${particle.alpha})`;
     ctx.fill();
   }
 
@@ -88,7 +76,7 @@ function drawParticles() {
         ctx.beginPath();
         ctx.moveTo(a.x, a.y);
         ctx.lineTo(b.x, b.y);
-        ctx.strokeStyle = `rgba(103, 232, 249, ${0.11 * (1 - distance / 115)})`;
+        ctx.strokeStyle = `rgba(0, 255, 102, ${0.11 * (1 - distance / 115)})`;
         ctx.lineWidth = 1;
         ctx.stroke();
       }
@@ -152,11 +140,6 @@ function pushLog() {
 function toggleActive() {
   active = !active;
   hudShell.classList.toggle("active", active);
-
-  const command = commands[Math.floor(Math.random() * commands.length)];
-  commandText.textContent = active ? command : "Tap the core to activate visual response";
-  statusText.textContent = active ? "Listening" : "Awaiting command";
-
   pushLog();
 }
 
@@ -174,7 +157,6 @@ window.addEventListener("resize", resizeCanvas);
 window.addEventListener("mousemove", handleParallax);
 window.addEventListener("mouseleave", resetParallax);
 coreWrap.addEventListener("click", toggleActive);
-micButton.addEventListener("click", toggleActive);
 
 resizeCanvas();
 buildWaveform();
