@@ -1,124 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#000000" />
-  <title>AI HUD</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alina</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{width:100%;height:100%;background:#000;overflow:hidden}
+    body{font-family:"Courier New","Lucida Console",monospace;color:#00ff66}
+    .alina{position:fixed;top:18px;left:18px;font-size:14px;letter-spacing:.08em;color:#00ff66;text-shadow:0 0 8px rgba(0,255,102,.65)}
+  </style>
 </head>
 <body>
-  <canvas id="particleCanvas" aria-hidden="true"></canvas>
-
-  <main class="hud-shell" id="hudShell">
-    <div class="grid-layer" aria-hidden="true"></div>
-    <div class="scanline" aria-hidden="true"></div>
-    <div class="vignette" aria-hidden="true"></div>
-
-    <header class="top-bar">
-      <section class="system-strip glass-card">
-        <div>
-          <span>CORE</span>
-          <strong>ONLINE</strong>
-        </div>
-        <div>
-          <span>MODE</span>
-          <strong>ACTIVE</strong>
-        </div>
-        <div>
-          <span>TIME</span>
-          <strong id="timeDisplay">00:00:00</strong>
-        </div>
-      </section>
-    </header>
-
-    <section class="side-panel left-panel glass-card">
-      <div class="panel-title">
-        <span></span>
-        <p>DIAGNOSTICS</p>
-      </div>
-      <div class="metric">
-        <div><span>Neural Load</span><b id="loadValue">68%</b></div>
-        <i style="--value:68%"></i>
-      </div>
-      <div class="metric">
-        <div><span>Signal Quality</span><b id="signalValue">91%</b></div>
-        <i style="--value:91%"></i>
-      </div>
-      <div class="metric">
-        <div><span>Response Sync</span><b id="syncValue">84%</b></div>
-        <i style="--value:84%"></i>
-      </div>
-
-      <div class="code-feed" id="codeFeed">
-        <p>&gt; matrix initialized...</p>
-        <p>&gt; local interface scanned...</p>
-        <p>&gt; adaptive shell active...</p>
-      </div>
-    </section>
-
-    <section class="side-panel right-panel glass-card">
-      <div class="panel-title">
-        <span></span>
-        <p>MODULES</p>
-      </div>
-      <div class="module-list">
-        <article><b>AUDIO</b><small>READY</small></article>
-        <article><b>VISION</b><small>STANDBY</small></article>
-        <article><b>MEMORY</b><small>SECURE</small></article>
-        <article><b>NETWORK</b><small>LOCKED</small></article>
-      </div>
-
-      <div class="radar-box">
-        <div class="radar"></div>
-      </div>
-    </section>
-
-    <section class="center-stage" aria-label="Futuristic AI HUD Core">
-      <div class="crosshair horizontal" aria-hidden="true"></div>
-      <div class="crosshair vertical" aria-hidden="true"></div>
-
-      <div class="core-wrap" id="coreWrap">
-        <div class="orbital orbital-1"></div>
-        <div class="orbital orbital-2"></div>
-        <div class="orbital orbital-3"></div>
-        <div class="tick-ring"></div>
-
-        <svg class="svg-ring ring-a" viewBox="0 0 420 420" aria-hidden="true">
-          <circle cx="210" cy="210" r="177" />
-          <circle cx="210" cy="210" r="145" />
-        </svg>
-
-        <svg class="svg-ring ring-b" viewBox="0 0 420 420" aria-hidden="true">
-          <circle cx="210" cy="210" r="191" />
-          <circle cx="210" cy="210" r="111" />
-        </svg>
-
-        <div class="ai-core omnitrix-core">
-          <div class="core-glow"></div>
-          <div class="omni-bezel">
-            <span class="omni-notch notch-top"></span>
-            <span class="omni-notch notch-right"></span>
-            <span class="omni-notch notch-bottom"></span>
-            <span class="omni-notch notch-left"></span>
-            <div class="omni-face">
-              <span class="omni-blade blade-top-left"></span>
-              <span class="omni-blade blade-top-right"></span>
-              <span class="omni-blade blade-bottom-left"></span>
-              <span class="omni-blade blade-bottom-right"></span>
-              <span class="omni-hourglass"></span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="waveform" id="waveform" aria-hidden="true"></div>
-    </section>
-  </main>
-
-  <script src="script.js"></script>
+  <div class="alina">Alina</div>
 </body>
 </html>
