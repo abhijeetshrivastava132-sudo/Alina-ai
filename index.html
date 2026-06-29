@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#02070d" />
-  <title>Alina AI HUD</title>
+  <meta name="theme-color" content="#000000" />
+  <title>AI HUD</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -19,22 +19,14 @@
     <div class="vignette" aria-hidden="true"></div>
 
     <header class="top-bar">
-      <section class="brand-panel glass-card">
-        <span class="status-dot"></span>
-        <div>
-          <p class="eyebrow">ALINA SYSTEM</p>
-          <h1>FUTURE AI INTERFACE</h1>
-        </div>
-      </section>
-
       <section class="system-strip glass-card">
         <div>
           <span>CORE</span>
-          <strong id="coreStatus">ONLINE</strong>
+          <strong>ONLINE</strong>
         </div>
         <div>
           <span>MODE</span>
-          <strong>ASSISTIVE</strong>
+          <strong>ACTIVE</strong>
         </div>
         <div>
           <span>TIME</span>
@@ -62,8 +54,8 @@
       </div>
 
       <div class="code-feed" id="codeFeed">
-        <p>&gt; initializing voice matrix...</p>
-        <p>&gt; scanning local interface...</p>
+        <p>&gt; matrix initialized...</p>
+        <p>&gt; local interface scanned...</p>
         <p>&gt; adaptive shell active...</p>
       </div>
     </section>
@@ -74,22 +66,10 @@
         <p>MODULES</p>
       </div>
       <div class="module-list">
-        <article>
-          <b>VOICE</b>
-          <small>READY</small>
-        </article>
-        <article>
-          <b>VISION</b>
-          <small>STANDBY</small>
-        </article>
-        <article>
-          <b>MEMORY</b>
-          <small>SECURE</small>
-        </article>
-        <article>
-          <b>NETWORK</b>
-          <small>LOCKED</small>
-        </article>
+        <article><b>AUDIO</b><small>READY</small></article>
+        <article><b>VISION</b><small>STANDBY</small></article>
+        <article><b>MEMORY</b><small>SECURE</small></article>
+        <article><b>NETWORK</b><small>LOCKED</small></article>
       </div>
 
       <div class="radar-box">
@@ -121,27 +101,12 @@
           <div class="core-glow"></div>
           <div class="core-face">
             <span></span>
-            <h2>ALINA</h2>
-            <p id="statusText">Awaiting command</p>
           </div>
         </div>
       </div>
 
       <div class="waveform" id="waveform" aria-hidden="true"></div>
     </section>
-
-    <footer class="bottom-command glass-card">
-      <button class="mic-button" id="micButton" type="button" aria-label="Activate voice interface">
-        <span></span>
-      </button>
-      <div class="command-copy">
-        <p>VOICE INTERFACE</p>
-        <strong id="commandText">Tap the core to activate visual response</strong>
-      </div>
-      <div class="mini-bars" aria-hidden="true">
-        <i></i><i></i><i></i><i></i><i></i><i></i>
-      </div>
-    </footer>
   </main>
 
   <script src="script.js"></script>
