@@ -16,10 +16,19 @@ body{font-family:"Courier New","Lucida Console",monospace;color:#00ff66}
 .controls{display:flex;gap:8px}
 button{padding:8px 13px;border:1px solid rgba(0,255,102,.5);background:rgba(0,20,6,.65);color:#00ff66;font-family:inherit;font-size:12px;letter-spacing:.08em;cursor:pointer}
 button:hover{background:rgba(0,255,102,.12)}
+.menu-btn{position:fixed;top:18px;right:18px;z-index:9;width:42px;height:34px;padding:0;font-size:18px;line-height:1}
+.history-panel{position:fixed;top:0;right:0;z-index:8;width:min(330px,86vw);height:100vh;padding:68px 14px 14px;border-left:1px solid rgba(0,255,102,.25);background:rgba(0,8,3,.94);box-shadow:-20px 0 40px rgba(0,0,0,.7);transform:translateX(100%);transition:transform .22s ease;overflow:hidden}
+.history-panel.open{transform:translateX(0)}
+.history-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;color:rgba(0,255,102,.82);font-size:13px;letter-spacing:.12em}
+.clear-btn{padding:7px 10px;font-size:11px}
+.history-list{height:calc(100vh - 118px);overflow:auto;padding-right:4px}
+.history-item{padding:10px 0;border-bottom:1px solid rgba(0,255,102,.14);font-size:12px;line-height:1.45;color:rgba(0,255,102,.85)}
+.history-item b{display:block;margin-bottom:4px;color:#00ff66;font-weight:400}.history-item span{display:block;color:rgba(0,255,102,.58)}
 .terminal{position:fixed;left:18px;bottom:18px;width:min(720px,calc(100vw - 36px));max-height:42vh;padding:14px;border:1px solid rgba(0,255,102,.22);background:rgba(0,12,4,.62);box-shadow:0 0 18px rgba(0,255,102,.08);overflow:hidden}
 .line{font-size:13px;line-height:1.55;color:rgba(0,255,102,.9);text-shadow:0 0 8px rgba(0,255,102,.28);word-break:break-word}.dim{color:rgba(0,255,102,.55)}
 .listening .name:after{content:" _";animation:blink .8s infinite}
 @keyframes blink{0%,45%{opacity:1}46%,100%{opacity:0}}
+@media(max-width:600px){.terminal{max-height:35vh}.history-panel{width:88vw}}
 </style>
 </head>
 <body>
@@ -29,6 +38,11 @@ button:hover{background:rgba(0,255,102,.12)}
 <div class="controls"><button id="listenBtn">LISTEN</button><button id="stopBtn">STOP</button></div>
 <div class="status" id="status">READY</div>
 </div>
+<button class="menu-btn" id="menuBtn">☰</button>
+<aside class="history-panel" id="historyPanel">
+<div class="history-head"><span>HISTORY</span><button class="clear-btn" id="clearHistoryBtn">CLEAR</button></div>
+<div class="history-list" id="historyList"></div>
+</aside>
 <section class="terminal" id="terminal"><p class="line dim">&gt; Alina initialized</p><p class="line dim">&gt; Click LISTEN and speak</p></section>
 </main>
 <script>
@@ -37,16 +51,28 @@ const statusEl=document.getElementById('status');
 const terminal=document.getElementById('terminal');
 const listenBtn=document.getElementById('listenBtn');
 const stopBtn=document.getElementById('stopBtn');
+const menuBtn=document.getElementById('menuBtn');
+const historyPanel=document.getElementById('historyPanel');
+const historyList=document.getElementById('historyList');
+const clearHistoryBtn=document.getElementById('clearHistoryBtn');
 const API_URL='/api/chat';
+const HISTORY_KEY='alina_history';
 const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
 let recognition=null;
+let history=JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]');
 function line(t,d=false){const p=document.createElement('p');p.className=d?'line dim':'line';p.textContent=t;terminal.appendChild(p);while(terminal.children.length>8)terminal.removeChild(terminal.firstElementChild)}
+function renderHistory(){historyList.innerHTML='';if(!history.length){historyList.innerHTML='<p class="history-item"><span>No history yet</span></p>';return}history.slice().reverse().forEach(item=>{const div=document.createElement('div');div.className='history-item';div.innerHTML='<b>&gt; '+escapeHtml(item.q)+'</b><span>'+escapeHtml(item.a)+'</span>';historyList.appendChild(div)})}
+function saveHistory(q,a){history.push({q,a,time:Date.now()});history=history.slice(-30);localStorage.setItem(HISTORY_KEY,JSON.stringify(history));renderHistory()}
+function escapeHtml(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 function say(t){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-IN';u.rate=.95;speechSynthesis.speak(u)}
 async function askAI(msg){try{const r=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg})});let d={};try{d=await r.json()}catch(err){}if(!r.ok)return 'Backend error: '+(d.detail||d.error||('HTTP '+r.status));return d.reply||'No reply received.'}catch(err){return 'Network error: '+err.message}}
-async function handle(text){line('> you: '+text);statusEl.textContent='THINKING';const reply=await askAI(text);line('> alina: '+reply);statusEl.textContent='READY';say(reply)}
+async function handle(text){line('> you: '+text);statusEl.textContent='THINKING';const reply=await askAI(text);line('> alina: '+reply);saveHistory(text,reply);statusEl.textContent='READY';say(reply)}
 function listen(){if(!SpeechRecognition){line('> browser speech recognition support nahi karta');say('Speech recognition is not supported.');return}recognition=new SpeechRecognition();recognition.lang='en-IN';recognition.interimResults=false;recognition.continuous=false;recognition.onstart=()=>{app.classList.add('listening');statusEl.textContent='LISTENING';line('> listening...',true)};recognition.onresult=e=>handle(e.results[0][0].transcript);recognition.onerror=()=>{statusEl.textContent='ERROR';line('> mic permission error')};recognition.onend=()=>{app.classList.remove('listening');if(statusEl.textContent==='LISTENING')statusEl.textContent='READY'};recognition.start()}
 function stopAll(){if(recognition)recognition.stop();speechSynthesis.cancel();app.classList.remove('listening');statusEl.textContent='READY';line('> stopped',true)}
 listenBtn.onclick=listen;stopBtn.onclick=stopAll;
+menuBtn.onclick=()=>historyPanel.classList.toggle('open');
+clearHistoryBtn.onclick=()=>{history=[];localStorage.removeItem(HISTORY_KEY);renderHistory()};
+renderHistory();
 </script>
 </body>
 </html>
