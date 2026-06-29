@@ -8,80 +8,56 @@
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;background:#000;overflow:hidden}
 body{font-family:"Courier New","Lucida Console",monospace;color:#00ff66}
-.app{width:100vw;height:100vh;position:relative;background:#000}
-.app:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(to bottom,transparent 0,transparent 5px,rgba(0,255,102,.025) 6px);pointer-events:none}
-.top-left{position:fixed;top:18px;left:18px;z-index:5;display:flex;flex-direction:column;align-items:flex-start;gap:12px}
-.name{font-size:14px;letter-spacing:.08em;text-shadow:0 0 8px rgba(0,255,102,.75)}
-.status{font-size:12px;letter-spacing:.12em;color:rgba(0,255,102,.65);text-shadow:0 0 8px rgba(0,255,102,.35)}
-.controls{display:flex;gap:8px}
-button{padding:8px 13px;border:1px solid rgba(0,255,102,.5);background:rgba(0,20,6,.65);color:#00ff66;font-family:inherit;font-size:12px;letter-spacing:.08em;cursor:pointer}
-button:hover{background:rgba(0,255,102,.12)}
-.menu-btn{position:fixed;top:18px;right:18px;z-index:9;width:42px;height:34px;padding:0;font-size:18px;line-height:1}
-.history-panel{position:fixed;top:0;right:0;z-index:8;width:min(330px,86vw);height:100vh;padding:68px 14px 14px;border-left:1px solid rgba(0,255,102,.25);background:rgba(0,8,3,.94);box-shadow:-20px 0 40px rgba(0,0,0,.7);transform:translateX(100%);transition:transform .22s ease;overflow:hidden}
-.history-panel.open{transform:translateX(0)}
-.history-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;color:rgba(0,255,102,.82);font-size:13px;letter-spacing:.12em}
-.clear-btn{padding:7px 10px;font-size:11px}
-.history-list{height:calc(100vh - 118px);overflow:auto;padding-right:4px}
-.history-item{padding:10px 0;border-bottom:1px solid rgba(0,255,102,.14);font-size:12px;line-height:1.45;color:rgba(0,255,102,.85)}
-.history-item b{display:block;margin-bottom:4px;color:#00ff66;font-weight:400}.history-item span{display:block;color:rgba(0,255,102,.58)}
+.app{width:100vw;height:100vh;position:relative;background:#000;display:none}
+.app.active{display:block}.app:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(to bottom,transparent 0,transparent 5px,rgba(0,255,102,.025) 6px);pointer-events:none}
+.login-screen{position:fixed;inset:0;background:#000;display:grid;place-items:center;padding:18px}.login-card{width:min(360px,100%);border:1px solid rgba(0,255,102,.35);padding:22px;background:rgba(0,12,4,.7);box-shadow:0 0 24px rgba(0,255,102,.12)}
+.login-card h1{font-size:16px;letter-spacing:.12em;margin-bottom:18px;text-shadow:0 0 8px rgba(0,255,102,.75)}
+.login-card input{width:100%;margin-bottom:12px;padding:11px;border:1px solid rgba(0,255,102,.35);background:#000;color:#00ff66;font-family:inherit;outline:none}.login-card input::placeholder{color:rgba(0,255,102,.45)}
+.login-actions{display:flex;gap:8px}.login-error{min-height:18px;margin-top:12px;font-size:12px;color:rgba(0,255,102,.75);line-height:1.4}
+.top-left{position:fixed;top:18px;left:18px;z-index:5;display:flex;flex-direction:column;align-items:flex-start;gap:12px}.name{font-size:14px;letter-spacing:.08em;text-shadow:0 0 8px rgba(0,255,102,.75)}
+.status{font-size:12px;letter-spacing:.12em;color:rgba(0,255,102,.65);text-shadow:0 0 8px rgba(0,255,102,.35)}.controls{display:flex;gap:8px;flex-wrap:wrap}
+button{padding:8px 13px;border:1px solid rgba(0,255,102,.5);background:rgba(0,20,6,.65);color:#00ff66;font-family:inherit;font-size:12px;letter-spacing:.08em;cursor:pointer}button:hover{background:rgba(0,255,102,.12)}
+.logout-btn{position:fixed;top:18px;right:68px;z-index:9}.menu-btn{position:fixed;top:18px;right:18px;z-index:9;width:42px;height:34px;padding:0;font-size:18px;line-height:1}
+.history-panel{position:fixed;top:0;right:0;z-index:8;width:min(330px,86vw);height:100vh;padding:68px 14px 14px;border-left:1px solid rgba(0,255,102,.25);background:rgba(0,8,3,.94);box-shadow:-20px 0 40px rgba(0,0,0,.7);transform:translateX(100%);transition:transform .22s ease;overflow:hidden}.history-panel.open{transform:translateX(0)}
+.history-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;color:rgba(0,255,102,.82);font-size:13px;letter-spacing:.12em}.clear-btn{padding:7px 10px;font-size:11px}.history-list{height:calc(100vh - 118px);overflow:auto;padding-right:4px}
+.history-item{padding:10px 0;border-bottom:1px solid rgba(0,255,102,.14);font-size:12px;line-height:1.45;color:rgba(0,255,102,.85)}.history-item b{display:block;margin-bottom:4px;color:#00ff66;font-weight:400}.history-item span{display:block;color:rgba(0,255,102,.58)}
 .terminal{position:fixed;left:18px;bottom:18px;width:min(720px,calc(100vw - 36px));max-height:42vh;padding:14px;border:1px solid rgba(0,255,102,.22);background:rgba(0,12,4,.62);box-shadow:0 0 18px rgba(0,255,102,.08);overflow:hidden}
-.line{font-size:13px;line-height:1.55;color:rgba(0,255,102,.9);text-shadow:0 0 8px rgba(0,255,102,.28);word-break:break-word}.dim{color:rgba(0,255,102,.55)}
-.listening .name:after{content:" _";animation:blink .8s infinite}
-@keyframes blink{0%,45%{opacity:1}46%,100%{opacity:0}}
-@media(max-width:600px){.terminal{max-height:35vh}.history-panel{width:88vw}}
+.line{font-size:13px;line-height:1.55;color:rgba(0,255,102,.9);text-shadow:0 0 8px rgba(0,255,102,.28);word-break:break-word}.dim{color:rgba(0,255,102,.55)}.listening .name:after{content:" _";animation:blink .8s infinite}@keyframes blink{0%,45%{opacity:1}46%,100%{opacity:0}}
+@media(max-width:600px){.terminal{max-height:35vh}.history-panel{width:88vw}.logout-btn{top:62px;right:18px}}
 </style>
 </head>
 <body>
+<section class="login-screen" id="loginScreen"><div class="login-card"><h1>Alina Login</h1><input id="emailInput" type="email" placeholder="email"><input id="passwordInput" type="password" placeholder="password"><div class="login-actions"><button id="loginBtn">LOGIN</button><button id="signupBtn">SIGN UP</button></div><p class="login-error" id="loginError"></p></div></section>
 <main class="app" id="app">
-<div class="top-left">
-<div class="name">Alina</div>
-<div class="controls"><button id="listenBtn">LISTEN</button><button id="stopBtn">STOP</button></div>
-<div class="status" id="status">READY</div>
-</div>
-<button class="menu-btn" id="menuBtn">☰</button>
-<aside class="history-panel" id="historyPanel">
-<div class="history-head"><span>HISTORY</span><button class="clear-btn" id="clearHistoryBtn">CLEAR</button></div>
-<div class="history-list" id="historyList"></div>
-</aside>
+<div class="top-left"><div class="name">Alina</div><div class="controls"><button id="listenBtn">LISTEN</button><button id="stopBtn">STOP</button></div><div class="status" id="status">READY</div></div>
+<button class="logout-btn" id="logoutBtn">LOGOUT</button><button class="menu-btn" id="menuBtn">☰</button>
+<aside class="history-panel" id="historyPanel"><div class="history-head"><span>HISTORY</span><button class="clear-btn" id="clearHistoryBtn">CLEAR</button></div><div class="history-list" id="historyList"></div></aside>
 <section class="terminal" id="terminal"><p class="line dim">&gt; Alina initialized</p><p class="line dim">&gt; Click LISTEN and speak</p></section>
 </main>
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js';
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, query, orderBy, limit, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
-
+import { getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
+import { getFirestore,collection,addDoc,getDocs,deleteDoc,query,orderBy,limit,serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
 const firebaseConfig={apiKey:'AIzaSyBFrV_4JNMEa5Kyn4ONgGU6TX3fm_PPG14',authDomain:'alina-9810d.firebaseapp.com',projectId:'alina-9810d',storageBucket:'alina-9810d.firebasestorage.app',messagingSenderId:'252424011810',appId:'1:252424011810:web:7b36824468e9a55211ca7b',measurementId:'G-ZRM0Z12S5W'};
-const firebaseApp=initializeApp(firebaseConfig);
-const db=getFirestore(firebaseApp);
-const messagesRef=collection(db,'messages');
-
-const app=document.getElementById('app');
-const statusEl=document.getElementById('status');
-const terminal=document.getElementById('terminal');
-const listenBtn=document.getElementById('listenBtn');
-const stopBtn=document.getElementById('stopBtn');
-const menuBtn=document.getElementById('menuBtn');
-const historyPanel=document.getElementById('historyPanel');
-const historyList=document.getElementById('historyList');
-const clearHistoryBtn=document.getElementById('clearHistoryBtn');
-const API_URL='/api/chat';
-const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
-let recognition=null;
-let history=[];
+const firebaseApp=initializeApp(firebaseConfig);const auth=getAuth(firebaseApp);const db=getFirestore(firebaseApp);
+const app=document.getElementById('app'),loginScreen=document.getElementById('loginScreen'),loginBtn=document.getElementById('loginBtn'),signupBtn=document.getElementById('signupBtn'),logoutBtn=document.getElementById('logoutBtn'),emailInput=document.getElementById('emailInput'),passwordInput=document.getElementById('passwordInput'),loginError=document.getElementById('loginError'),statusEl=document.getElementById('status'),terminal=document.getElementById('terminal'),listenBtn=document.getElementById('listenBtn'),stopBtn=document.getElementById('stopBtn'),menuBtn=document.getElementById('menuBtn'),historyPanel=document.getElementById('historyPanel'),historyList=document.getElementById('historyList'),clearHistoryBtn=document.getElementById('clearHistoryBtn');
+const API_URL='/api/chat';const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;let recognition=null,history=[],currentUser=null;
+function userMessagesRef(){return collection(db,'users',currentUser.uid,'messages')}
 function line(t,d=false){const p=document.createElement('p');p.className=d?'line dim':'line';p.textContent=t;terminal.appendChild(p);while(terminal.children.length>8)terminal.removeChild(terminal.firstElementChild)}
-function renderHistory(){historyList.innerHTML='';if(!history.length){historyList.innerHTML='<p class="history-item"><span>No history yet</span></p>';return}history.forEach(item=>{const div=document.createElement('div');div.className='history-item';div.innerHTML='<b>&gt; '+escapeHtml(item.q)+'</b><span>'+escapeHtml(item.a)+'</span>';historyList.appendChild(div)})}
-async function loadHistory(){try{const q=query(messagesRef,orderBy('createdAt','desc'),limit(30));const snap=await getDocs(q);history=snap.docs.map(d=>({id:d.id,...d.data()}));renderHistory()}catch(err){historyList.innerHTML='<p class="history-item"><span>Firestore error: '+escapeHtml(err.message)+'</span></p>'}}
-async function saveHistory(q,a){try{await addDoc(messagesRef,{q,a,createdAt:serverTimestamp()});await loadHistory()}catch(err){line('> history save error: '+err.message,true)}}
-async function clearHistory(){try{const q=query(messagesRef,orderBy('createdAt','desc'),limit(30));const snap=await getDocs(q);await Promise.all(snap.docs.map(d=>deleteDoc(d.ref)));history=[];renderHistory()}catch(err){line('> clear history error: '+err.message,true)}}
 function escapeHtml(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function renderHistory(){historyList.innerHTML='';if(!history.length){historyList.innerHTML='<p class="history-item"><span>No history yet</span></p>';return}history.forEach(item=>{const div=document.createElement('div');div.className='history-item';div.innerHTML='<b>&gt; '+escapeHtml(item.q)+'</b><span>'+escapeHtml(item.a)+'</span>';historyList.appendChild(div)})}
+async function loadHistory(){if(!currentUser)return;try{const q=query(userMessagesRef(),orderBy('createdAt','desc'),limit(30));const snap=await getDocs(q);history=snap.docs.map(d=>({id:d.id,...d.data()}));renderHistory()}catch(err){historyList.innerHTML='<p class="history-item"><span>Firestore error: '+escapeHtml(err.message)+'</span></p>'}}
+async function saveHistory(q,a){if(!currentUser)return;try{await addDoc(userMessagesRef(),{q,a,uid:currentUser.uid,email:currentUser.email,createdAt:serverTimestamp()});await loadHistory()}catch(err){line('> history save error: '+err.message,true)}}
+async function clearHistory(){if(!currentUser)return;try{const q=query(userMessagesRef(),orderBy('createdAt','desc'),limit(30));const snap=await getDocs(q);await Promise.all(snap.docs.map(d=>deleteDoc(d.ref)));history=[];renderHistory()}catch(err){line('> clear history error: '+err.message,true)}}
 function say(t){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-IN';u.rate=.95;speechSynthesis.speak(u)}
 async function askAI(msg){try{const r=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg})});let d={};try{d=await r.json()}catch(err){}if(!r.ok)return 'Backend error: '+(d.detail||d.error||('HTTP '+r.status));return d.reply||'No reply received.'}catch(err){return 'Network error: '+err.message}}
 async function handle(text){line('> you: '+text);statusEl.textContent='THINKING';const reply=await askAI(text);line('> alina: '+reply);await saveHistory(text,reply);statusEl.textContent='READY';say(reply)}
 function listen(){if(!SpeechRecognition){line('> browser speech recognition support nahi karta');say('Speech recognition is not supported.');return}recognition=new SpeechRecognition();recognition.lang='en-IN';recognition.interimResults=false;recognition.continuous=false;recognition.onstart=()=>{app.classList.add('listening');statusEl.textContent='LISTENING';line('> listening...',true)};recognition.onresult=e=>handle(e.results[0][0].transcript);recognition.onerror=()=>{statusEl.textContent='ERROR';line('> mic permission error')};recognition.onend=()=>{app.classList.remove('listening');if(statusEl.textContent==='LISTENING')statusEl.textContent='READY'};recognition.start()}
 function stopAll(){if(recognition)recognition.stop();speechSynthesis.cancel();app.classList.remove('listening');statusEl.textContent='READY';line('> stopped',true)}
-listenBtn.onclick=listen;stopBtn.onclick=stopAll;
-menuBtn.onclick=()=>historyPanel.classList.toggle('open');
-clearHistoryBtn.onclick=clearHistory;
-loadHistory();
+async function login(){loginError.textContent='';try{await signInWithEmailAndPassword(auth,emailInput.value.trim(),passwordInput.value)}catch(err){loginError.textContent=err.message}}
+async function signup(){loginError.textContent='';try{await createUserWithEmailAndPassword(auth,emailInput.value.trim(),passwordInput.value)}catch(err){loginError.textContent=err.message}}
+onAuthStateChanged(auth,user=>{currentUser=user;if(user){loginScreen.style.display='none';app.classList.add('active');line('> logged in: '+user.email,true);loadHistory()}else{app.classList.remove('active');loginScreen.style.display='grid';history=[];renderHistory()}});
+loginBtn.onclick=login;signupBtn.onclick=signup;logoutBtn.onclick=()=>signOut(auth);listenBtn.onclick=listen;stopBtn.onclick=stopAll;menuBtn.onclick=()=>historyPanel.classList.toggle('open');clearHistoryBtn.onclick=clearHistory;
 </script>
 </body>
 </html>
